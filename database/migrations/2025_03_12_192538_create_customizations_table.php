@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('customizations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade'); // foreign key for product
             $table->enum('customization_type', ['color', 'size', 'material', 'engraving'])->default('color');
             $table->decimal('price', 8, 2); // additional price for customization
             $table->timestamps();
+            $table->foreignId('product_id')->constrained()->onDelete('cascade'); // foreign key for product
         });
     }
 

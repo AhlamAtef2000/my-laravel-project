@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('cart_id')->constrained()->onDelete('cascade'); // ربط بالسلة
             $table->foreignId('product_id')->constrained()->onDelete('cascade'); // ربط بالمنتج
             $table->integer('quantity')->default(1); // الكمية الافتراضية 1
-            $table->decimal('price', 10, 2); // سعر المنتج وقت الإضافة
             $table->timestamps();
         });
     }

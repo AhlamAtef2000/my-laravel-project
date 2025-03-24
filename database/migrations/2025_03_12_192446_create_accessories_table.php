@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('accessories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade'); // foreign key for product
-            // $table->string('type');                        // type (e.g., brooch, embroidery)
-            // or  $table->enum('type', ['brooch', 'embroidery', 'patch', 'badge'])->default('brooch'); 
             $table->string('name'); // accessory name
             $table->decimal('price', 8, 2); // price
+            $table->enum('type', ['brooch', 'embroidery', 'patch', 'badge'])->default('brooch');
             $table->timestamps();
+
+            $table->foreignId('product_id')->constrained()->onDelete('cascade'); // foreign key for product
         });
     }
 

@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('name'); // product name
             $table->text('description'); // description
             $table->decimal('price', 8, 2); // price
-            $table->string('image'); // product image
             $table->unsignedInteger('stock')->default(0);
+            $table->string('image'); // product image
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
