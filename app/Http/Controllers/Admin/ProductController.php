@@ -11,13 +11,17 @@ class ProductController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware('admin');
+        $this->middleware('admin');
     }
 
     public function index()
     {
         $products = Product::latest()->paginate(10);
-        return response()->json(['products' => $products]);
+        return view('admin.products.index', compact('products'));
+    }
+
+    public function create() {
+        return view('admin.products.create');
     }
 
     public function store(Request $request)
@@ -27,29 +31,36 @@ class ProductController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'active' => 'boolean'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $data = $request->all();
+
+        // set active status
+        $data['active'] = $request->has('active');
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
             $data['image'] = $imagePath;
         }
 
-        $product = Product::create($data);
+        Product::create($data);
 
-        return response()->json(['product' => $product], 201);
+        return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }
 
     public function show(Product $product)
     {
-        return response()->json(['product' => $product]);
+        return view('admin.products.show', compact('product'));
+    }
+
+    public function edit(Product $product)
+    {
+        return view('admin.products.edit', compact('product'));
     }
 
     public function update(Request $request, Product $product)
@@ -60,14 +71,16 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
-            'active' => 'boolean'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $data = $request->all();
+
+        // Set active status
+        $data['active'] = $request->has('active');
 
         if ($request->hasFile('image')) {
             // remove old image
@@ -79,7 +92,8 @@ class ProductController extends Controller
         }
 
         $product->update($data);
-        return response()->json(['product' => $product]);
+
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
     }
 
     public function destroy(Product $product)
@@ -91,6 +105,6 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return response()->json(['message' => 'Product deleted successfully.']);
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
 }

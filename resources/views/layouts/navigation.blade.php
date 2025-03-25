@@ -22,7 +22,7 @@
                     @auth
                         @if (Auth::user()->isAdmin())
                             <x-nav-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')">
-                                {{ __('Products') }}
+                                {{ __('Admin Products') }}
                             </x-nav-link>
                             <x-nav-link :href="route('admin.customers.index')" :active="request()->routeIs('admin.customers.*')">
                                 {{ __('Customers') }}
