@@ -15,7 +15,20 @@ class Product extends Model
         'price',
         'image',
         'stock',
+        'active',
     ];
+
+    // علاقة مع عناصر الطلبات
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -29,12 +42,6 @@ class Product extends Model
     public function customizations()
     {
         return $this->hasMany(Customization::class);
-    }
-
-    // علاقة مع عناصر الطلبات
-    public function orderItems()
-    {
-        return $this->hasMany(OrderItem::class);
     }
 
     // علاقة مع المراجعات

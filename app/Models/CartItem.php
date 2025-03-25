@@ -9,15 +9,13 @@ class CartItem extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'cart_id',
+        'user_id',
         'product_id',
         'quantity',
-        'price',
     ];
 
-    public function cart()
-    {
-        return $this->belongsTo(Cart::class);
+    public function user() {
+        return $this->belongsTo(User::class);
     }
 
     // علاقة مع المنتج
