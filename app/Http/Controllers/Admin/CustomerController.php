@@ -17,7 +17,12 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = User::where('role', 'customer')->latest()->paginate(10);
-        return response()->json(['customers' => $customers]);
+        return view('admin.customers.index', compact('customers'));
+    }
+
+    public function create()
+    {
+        return view('admin.customers.create');
     }
 
     public function store(Request $request)
@@ -31,10 +36,13 @@ class CustomerController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        $customer = User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -43,36 +51,56 @@ class CustomerController extends Controller
             'role' => 'customer',
         ]);
 
-        return response()->json(['customer' => $customer], 201);
+        return redirect()
+            ->route('admin.customers.index')
+            ->with('success', 'Customer created successfully.');
     }
 
     public function show(User $customer)
     {
         if ($customer->role !== 'customer') {
-            return response()->json(['message' => 'Not a customer'], 404);
+            return redirect()
+                ->route('admin.customers.index')
+                ->with('error', 'The specified user is not a customer.');
         }
-        return response()->json(['customer' => $customer]);
+
+        // Get customer's orders
+        $orders = $customer->orders()->latest()->get();
+
+        return view('admin.customers.show', compact('orders', 'customer'));
+    }
+
+    public function edit(User $customer)
+    {
+        if ($customer->role !== 'customer') {
+            return redirect()->route('admin.customers.index')->with('error', 'The specified user is not a customer.');
+        }
+
+        return view('admin.customers.edit', compact('customer'));
     }
 
     public function update(Request $request, User $customer)
     {
         if ($customer->role !== 'customer') {
-            return response()->json(['message' => 'Not a customer'], 404);
+            return redirect()->route('admin.customers.index');
         }
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $customer->id,
-            'password' => 'required|string|min:8',
+            'password' => 'nullable|string|min:8|confirmed',
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        $data = $request->except('password');
+        $data = $request->except('password', 'password_confirmation');
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
@@ -80,17 +108,17 @@ class CustomerController extends Controller
 
         $customer->update($data);
 
-        return response()->json(['customer' => $customer]);
+        return redirect()->route('admin.customers.index')->with('success', 'Customer updated successfully.');
     }
 
     public function destroy(User $customer)
     {
         if ($customer->role !== 'customer') {
-            return response()->json(['message' => 'Not a customer'], 404);
+            return redirect()->route('admin.customers.index')->with('error', 'The specific user is not a customer.');
         }
 
         $customer->delete();
 
-        return response()->json(['message' => 'Customer deleted successfully.']);
+        return redirect()->route('admin.customers.index')->with('success', 'Customer deleted successfully.');
     }
 }

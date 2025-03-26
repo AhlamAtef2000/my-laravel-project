@@ -47,7 +47,7 @@
                             <div>
                                 <label for="price"
                                     class="block text-sm font-medium text-gray-700">{{ __('Price (ZAR)') }}</label>
-                                <input type="number" name="price" id="price" value="{{ old('price') }}"
+                                <input type="text" name="price" id="price" value="{{ old('price') }}"
                                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
                                 @error('price')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
