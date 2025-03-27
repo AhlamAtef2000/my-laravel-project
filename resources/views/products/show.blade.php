@@ -11,7 +11,7 @@
                     <div class="md:flex md:items-start">
                         <div class="md:w-1/2">
                             <div class="w-full h-96 bg-gray-200 rounded-mb overflow-hidden">
-                                @if($product->name)
+                                @if($product->image)
                                     <img
                                         src="{{ asset('storage/' . $product->image)}}"
                                         alt="{{ $product->name}}"

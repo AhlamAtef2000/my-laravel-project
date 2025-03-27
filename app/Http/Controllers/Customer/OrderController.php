@@ -11,18 +11,20 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::where('user_id', Auth::id())
-            ->with('orderItems.product')
             ->latest()
-            ->get();
-        return response()->json(['orders' => $orders]);
+            ->paginate(10);
+
+        return view('customer.orders.index', compact('orders'));
     }
 
     public function show(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            abort(403, 'Unauthorized');
         }
 
-        return response()->json(['order' => $order->load('orderItems.product')]);
+        $order->load('orderItems.product');
+
+        return view('customer.orders.show', compact('order'));
     }
 }

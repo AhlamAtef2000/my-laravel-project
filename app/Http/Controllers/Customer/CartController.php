@@ -19,10 +19,7 @@ class CartController extends Controller
             return $item->quantity * $item->product->price;
         });
 
-        return response()->json([
-            'cartItems' => $cartItems,
-            'total' => $total
-        ]);
+        return view('customer.cart.index', compact('cartItems', 'total'));
     }
 
     public function store(Request $request)
@@ -33,13 +30,15 @@ class CartController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $product = Product::findOrFail($request->product_id);
 
         if ($product->stock < $request->quantity) {
-            return response()->json(['message' => 'Not enough stock available'], 422);
+            return redirect()->back()
+                ->with('error', 'Not enough stock available')
+                ->withInput();
         }
 
         $existingItem = CartItem::where('user_id', Auth::id())
@@ -48,23 +47,28 @@ class CartController extends Controller
 
         if ($existingItem) {
             $existingItem->quantity += $request->quantity;
+
+            // Check if the updated quantity exceeds available stock
+            if($existingItem->quantity > $product->stock) {
+                return redirect()->back()->with('error', 'Not enough stock available.');
+            }
+
             $existingItem->save();
-            $cartItem = $existingItem;
         } else {
-            $cartItem = CartItem::create([
+            CartItem::create([
                 'user_id' => Auth::id(),
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity
             ]);
         }
 
-        return response()->json(['cartItems' => $cartItem->load('product')], 201);
+        return redirect()->route('cart.index')->with('success', 'Product added to cart successfully.');
     }
 
     public function update(Request $request, CartItem $cartItem)
     {
         if ($cartItem->user_id !== Auth::id()) {
-            return response()->json(['message' => 'authorized'], 403);
+            abort(403, 'Unauthorized action');
         }
 
         $validator = Validator::make($request->all(), [
@@ -72,36 +76,36 @@ class CartController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $product = Product::findOrFail($cartItem->product_id);
 
         if ($product->stock < $request->quantity) {
-            return response()->json(['message' => 'Not enough stock available.'], 422);
+            return redirect()->back()->with('error', 'Not enough stock available.')->withInput();
         }
 
         $cartItem->quantity = $request->quantity;
         $cartItem->save();
 
-        return response()->json(['cartItems' => $cartItem->load('product')]);
+        return redirect()->route('cart.index')->with('success', 'Cart updated successfully.');
     }
 
     public function destroy(CartItem $cartItem)
     {
         if ($cartItem->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Authorized'], 403);
+            abort(403, 'Unauthorized action');
         }
 
         $cartItem->delete();
 
-        return response()->json(['message' => 'Item removed from cart']);
+        return redirect()->route('cart.index')->with('success', 'Item removed from cart.');
     }
 
     public function clear()
     {
         CartItem::where('user_id', Auth::id())->delete();
 
-        return response()->json(['message' => 'Cart cleared']);
+        return redirect()->route('cart.index')->with('success', 'Cart cleared successfully.');
     }
 }

@@ -9,28 +9,49 @@ use Illuminate\Http\Request;
 
 class CheckoutController extends Controller
 {
-    public function checkout(Request $request)
+    public function index()
     {
-        $validator = Validator::make($request->all(), [
+        $cartItems = CartItem::where('user_id', Auth::id())->with('product')->get();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+
+        $total = $cartItems->sum(function ($item) {
+            return $item->quantity * $item->product->price;
+        });
+
+        return view('customer.checkout.index', compact('cartItems', 'total'));
+    }
+
+    public function process(Request $request)
+    {
+        $validator =  Validator::make($request->all(), [
             'payment_method' => 'required|string',
             'shipping_address' => 'required|string'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $cartItems = CartItem::where('user_id', Auth::id())->with('product')->get();
 
         if ($cartItems->isEmpty()) {
-            return response()->json(['message' => 'Cart is empty'], 422);
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
+        // check stock for all items
         foreach ($cartItems as $cartItem) {
+            if (!$cartItem->product->active) {
+                return redirect()
+                    ->route('cart.index')
+                    ->with('error', "Sorry, {$cartItem->product->name} is no longer available and has been removed from your cart.");
+            }
             if ($cartItem->product->stock < $cartItem->quantity) {
-                return response()->json([
-                    'message'  => 'Not enough stock for ' . $cartItem->product->name,
-                ], 422);
+                return redirect()
+                    ->route('cart.index')
+                    ->with('error', "Not enough stock available for {$cartItem->product->name}. Available: {$cartItem->product->stock}");
             }
         }
 
@@ -42,7 +63,7 @@ class CheckoutController extends Controller
                 return $item->quantity * $item->product->price;
             });
 
-            // Create a order
+            // Create order
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'total_amount' => $total,
@@ -62,7 +83,7 @@ class CheckoutController extends Controller
                 ]);
 
                 // update product stock
-                $product = Product::find($cartItem->product_id);
+                $product = $cartItem->product;
                 $product->stock -= $cartItem->quantity;
                 $product->save();
             }
@@ -72,16 +93,13 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'message' => 'Order placed successfully.',
-                'order' => $order->load('orderItems.product')
-            ], 201);
+            return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully');
         } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'message' => 'Checkout failed',
-                'error' => $e->getMessage()
-            ]);
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Checkout failed: ' . $e->getMessage())
+                ->withInput();
         }
     }
+
 }

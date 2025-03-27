@@ -34,7 +34,7 @@ Route::middleware(['auth'])->group(function() {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Customer routes
+    // Customer cart routes
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
     Route::put('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
@@ -42,15 +42,21 @@ Route::middleware(['auth'])->group(function() {
     Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
 
     // Checkout
-    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
 
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
 
     // Admin routes
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function() {
+        // Admin Product Management
         Route::resource('products', AdminProductController::class);
+
+        // Admin Customer Management
         Route::resource('customers', AdminCustomerController::class);
+
+        // Admin Order Management
         Route::resource('orders', AdminOrderController::class);
     });
 });
