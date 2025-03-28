@@ -8,20 +8,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="md:flex md:items-start">
+                    <div class="md:flex md:items-start" style="gap: 2%">
                         <div class="md:w-1/2">
                             <div class="w-full h-96 bg-gray-200 rounded-mb overflow-hidden">
-                                @if($product->image)
-                                    <img
-                                        src="{{ asset('storage/' . $product->image)}}"
-                                        alt="{{ $product->name}}"
-                                        class="w-full h-full object-center object-cover"
-                                    />
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center">
-                                        <span class="text-gray-500">No Image</span>
-                                    </div>
-                                @endif
+                                <div
+                                class="w-full bg-gray-200 aspect-square rounded-md overflow-hidden group-hover:opacity-75">
+                                <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('assets/images/products/default/default.jpg') }}"
+                                    alt="{{ $product->name }}" class="w-full h-full object-center object-cover" style="width: 300px">
+                            </div>
                             </div>
                         </div>
                         <div class="mt-8 md:mt-0 md:ml-8 md:w-1/2">

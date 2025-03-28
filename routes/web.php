@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\{ProductController as AdminProductController,CustomerController as AdminCustomerController,OrderController as AdminOrderController};
 use App\Http\Controllers\Customer\{CartController, CheckoutController,OrderController as CustomerOrderController};
 use App\Http\Controllers\{ProductController, ProfileController};
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,8 +18,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    $products = Product::where('active', true)
+                        ->latest()
+                        ->paginate(20);
+
+    return view('welcome', compact('products'));
+})->name('home');
 
 // Public routes
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
