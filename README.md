@@ -106,4 +106,49 @@ After logging in as a customer, you can:
 - Complete the checkout process
 - View your order history
 
+## PayPal Integration
+
+This application includes PayPal integration for online payments. To set up PayPal:
+
+1. Create a developer account at [PayPal Developer](https://developer.paypal.com/) if you don't already have one.
+
+2. Create a PayPal app to get your API credentials:
+   - Go to the [Developer Dashboard](https://developer.paypal.com/dashboard/) and log in
+   - Click on "My Apps & Credentials"
+   - Create a new app (make sure it's in Sandbox for testing)
+   - Once created, copy the Client ID and Secret
+
+3. Add the credentials to your `.env` file:
+   ```
+   PAYPAL_MODE=sandbox
+   PAYPAL_SANDBOX_CLIENT_ID=your_sandbox_client_id_here
+   PAYPAL_SANDBOX_CLIENT_SECRET=your_sandbox_secret_here
+   ```
+4. For testing, you can use PayPal Sandbox accounts:
+   - Go to the Sandbox section in your PayPal developer dashboard
+   - Create or use existing sandbox accounts
+   - Use these accounts to test the payment flow
+
+5. When you're ready to go live:
+   - Create a live PayPal app in your developer dashboard
+   - Update your `.env` file with live credentials:
+     ```
+     PAYPAL_MODE=live
+     PAYPAL_LIVE_CLIENT_ID=your_live_client_id_here
+     PAYPAL_LIVE_CLIENT_SECRET=your_live_secret_here
+     ```
+
+### Testing PayPal Payments
+
+To test the PayPal integration:
+1. Add products to your cart
+2. Proceed to checkout
+3. Select "PayPal" as the payment method
+4. Click "Place Order"
+5. You will be redirected to the PayPal sandbox environment
+6. Log in with a PayPal sandbox account
+7. Complete the payment
+8. You will be redirected back to the application
+
+
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
