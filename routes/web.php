@@ -44,9 +44,16 @@ Route::middleware(['auth'])->group(function() {
     // Checkout
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/payment-failed', [CheckoutController::class, 'paymentFailed'])->name('checkout.payment-failed');
 
+    // Paypal Routes
+    Route::get('/checkout/paypal/success', [CheckoutController::class, 'paypalSuccess'])->name('checkout.paypal.success');
+    Route::get('/checkout/paypal/cancel', [CheckoutController::class, 'paypalCancel'])->name('checkout.paypal.cancel');
+
+    // Customer Order Routes
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+
 
     // Admin routes
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function() {

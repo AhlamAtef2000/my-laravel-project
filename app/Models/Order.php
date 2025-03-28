@@ -15,24 +15,24 @@ class Order extends Model
         'status',
         'payment_method',
         'payment_status',
+        'payment_id',
         'shipping_address',
     ];
 
-    // علاقة مع المستخدم
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // علاقة مع عناصر الطلبات
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function products() {
+    public function products()
+    {
         return $this->belongsToMany(Product::class, 'order_items')
-                        ->withPivot('quantity', 'price')
-                        ->withTimestamps();
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
     }
 }
